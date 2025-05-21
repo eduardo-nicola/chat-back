@@ -1,0 +1,106 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"vcs": {
+		"enabled": false,
+		"clientKind": "git",
+		"useIgnoreFile": false
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"ignore": ["node_modules"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 120
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"nursery": {
+				"noDuplicateElseIf": "error",
+				"noCommonJs": "error"
+			},
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noDoubleEquals": "error",
+				"noShadowRestrictedNames": "error",
+				"noDuplicateParameters": "error",
+				"noDuplicateClassMembers": "error",
+				"noDuplicateCase": "error"
+			},
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedFunctionParameters": "error",
+				"noInvalidUseBeforeDeclaration": "error",
+				"noUnusedImports": "error"
+			},
+			"style": {
+				"noVar": "error",
+				"useConst": "error",
+				"useTemplate": "warn",
+				"useNodejsImportProtocol": "error",
+				"useShorthandArrayType": "warn",
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"enumMemberCase": "CONSTANT_CASE",
+						"conventions": [
+							{
+								"selector": {
+									"kind": "const",
+									"scope": "global"
+								},
+								"formats": ["camelCase"]
+							},
+							{
+								"selector": {
+									"kind": "class",
+									"scope": "global"
+								},
+								"formats": ["PascalCase"]
+							},
+							{
+								"selector": {
+									"kind": "objectLiteralProperty",
+									"scope": "any"
+								},
+								"formats": ["snake_case", "camelCase", "CONSTANT_CASE", "PascalCase"]
+							},
+							{
+								"selector": {
+									"kind": "classProperty",
+									"scope": "any"
+								},
+								"formats": ["snake_case", "camelCase", "CONSTANT_CASE", "PascalCase"]
+							},
+							{
+								"selector": {
+									"kind": "typeProperty",
+									"scope": "any"
+								},
+								"formats": ["snake_case", "camelCase", "CONSTANT_CASE", "PascalCase"]
+							}
+						],
+						"strictCase": false
+					}
+				}
+			},
+			"complexity": {
+				"noForEach": "warn"
+			},
+			"performance": {},
+			"security": {}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "always"
+		}
+	}
+}
