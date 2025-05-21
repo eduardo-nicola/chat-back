@@ -2,7 +2,8 @@
 /dist
 /node_modules
 /build
-
+/generated
+/.vscode
 # Logs
 logs
 *.log

@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  svc-postgres:
+    image: postgres:17
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    networks:
+      - chat-network
+    env_file:
+      - ./.env.dev
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  svc-nestjs:
+    build:
+      context: .
+      dockerfile: node.Dockerfile
+    env_file:
+      - ./.env.dev
+    container_name: nest-service
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - svc-postgres
+    networks:
+      - chat-network
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+
+networks:
+  chat-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
