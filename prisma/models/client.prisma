@@ -1,0 +1,25 @@
+model Client {
+  id            String  @id @unique @default(cuid())
+  documentId    Int     @unique @map("document_id")
+  documentType  documentType    @map("document_type")
+  name          String
+  plan          plan @default(PREPAID)
+  balance       Int?     
+  limit         Int?     
+  active        Boolean @default(false)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+
+  @@map("clients")
+}
+
+enum documentType {
+  CPF
+  CNPJ
+}
+
+enum plan {
+  PREPAID 
+  POSTPAID
+}

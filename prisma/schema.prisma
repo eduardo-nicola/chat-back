@@ -1,8 +1,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
-
 }
 
 datasource db {
@@ -10,3 +8,4 @@ datasource db {
   url      = env("DB_URL")
   
 }
+

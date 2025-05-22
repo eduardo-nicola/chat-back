@@ -16,28 +16,28 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  svc-nestjs:
-    build:
-      context: .
-      dockerfile: node.Dockerfile
-    env_file:
-      - ./.env.dev
-    container_name: nest-service
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-    ports:
-      - "3000:3000"
-    depends_on:
-      - svc-postgres
-    networks:
-      - chat-network
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
+  # svc-nestjs:
+  #   build:
+  #     context: .
+  #     dockerfile: node.Dockerfile
+  #   env_file:
+  #     - ./.env.dev
+  #   container_name: nest-service
+  #   environment:
+  #     DB_HOST: ${DB_HOST}
+  #     DB_PORT: ${DB_PORT}
+  #     DB_USER: ${DB_USER}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #     DB_NAME: ${DB_NAME}
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - svc-postgres
+  #   networks:
+  #     - chat-network
+  #   volumes:
+  #     - ./:/usr/src/app
+  #     - /usr/src/app/node_modules
 
 networks:
   chat-network:
