@@ -1,12 +1,13 @@
 model Client {
   id            String  @id @unique @default(cuid())
-  documentId    Int     @unique @map("document_id")
+  documentId    String      @unique @map("document_id")
   documentType  documentType    @map("document_type")
   name          String
   plan          plan @default(PREPAID)
   balance       Int?     
   limit         Int?     
   active        Boolean @default(false)
+  password      String 
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime? @updatedAt @map("updated_at")

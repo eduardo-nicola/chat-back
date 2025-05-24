@@ -18,6 +18,6 @@ export async function handlePrisma<T>(operation: () => Promise<T>): Promise<T> {
 			}
 		}
 		logger.error('Erro não esperado no Prisma', error);
-		throw new HttpException('Erro interno da utilização do Prisma', HttpStatus.INTERNAL_SERVER_ERROR);
+		throw new HttpException('Erro interno da utilização do Prisma:', HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }
