@@ -7,7 +7,7 @@ import { MessagesController } from './messages.controller';
 @Module({
 	imports: [
 		BullModule.registerQueue({
-			name: 'email',
+			name: 'message-queue',
 		}),
 	],
 	providers: [MessageQueueService, MessageQueueProcessor],
