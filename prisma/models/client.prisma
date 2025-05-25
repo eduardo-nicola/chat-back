@@ -9,6 +9,7 @@ model Client {
   active        Boolean @default(false)
   password      String 
   phone         String @map("phone_number") @unique
+  sessionFile   String @map("session_file")
 
   messages Message[]
   
