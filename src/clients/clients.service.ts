@@ -11,23 +11,27 @@ export class ClientsService {
 	constructor(private readonly prismaService: PrismaService) {}
 	async create(createClientDto: CreateClientDto): Promise<Omit<Client, 'password'>> {
 		const hashPassword = await bcrypt.hashSync(createClientDto.password, 10);
-		return handlePrisma(
+
+		const client = await handlePrisma(
 			async () =>
 				await this.prismaService.client.create({
 					data: {
 						name: createClientDto.name,
 						documentId: createClientDto.document,
 						documentType: cpf.isValid(String(createClientDto.document)) ? 'CPF' : 'CNPJ',
+						phone: createClientDto.phone,
 						password: hashPassword,
+						sessionFile: `sessions/${createClientDto.phone}.json`,
 					},
 					omit: {
 						password: true,
 					},
 				}),
 		);
+		return client;
 	}
 
-	findByDocument(documentId: string) {
+	async findByDocument(documentId: string) {
 		return handlePrisma(
 			async () =>
 				await this.prismaService.client.findUnique({
@@ -36,5 +40,24 @@ export class ClientsService {
 					},
 				}),
 		);
+	}
+
+	async updateBalance(documentId: string, balance: number) {
+		const newBalance = await handlePrisma(async () => {
+			return await this.prismaService.client.update({
+				where: {
+					documentId: documentId,
+				},
+				data: {
+					balance: balance,
+					active: true,
+				},
+				select: {
+					balance: true,
+				},
+			});
+		});
+
+		return { message: 'Balance atualizado com sucesso', balance: newBalance.balance };
 	}
 }

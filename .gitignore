@@ -47,6 +47,7 @@ lerna-debug.log*
 .temp
 .tmp
 .pnpm-store/*
+/session
 # Runtime data
 pids
 *.pid

@@ -1,6 +1,6 @@
 import { isCpfOrCnpj } from '@/decorators/is-cpf-or-cnpj';
 import { IsNotBlank } from '@/decorators/is-not-blanck';
-import { IsNotEmpty, MaxLength, MinLength } from '@nestjs/class-validator';
+import { IsNotEmpty, IsPhoneNumber, MaxLength, MinLength } from '@nestjs/class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateClientDto {
@@ -15,6 +15,10 @@ export class CreateClientDto {
 	@MaxLength(14, { message: 'Documento deve ter no maximo 14 caracteres' })
 	@isCpfOrCnpj()
 	document: string;
+
+	@IsNotEmpty({ message: 'O Telefone é obrigatorio' })
+	@IsPhoneNumber('BR', { message: 'Telefone deve ser um número de telefone válido' })
+	phone: string;
 
 	@IsNotEmpty({ message: 'Senha é obrigatorio' })
 	@MinLength(6, { message: 'Senha deve ter no minimo 6 caracteres' })

@@ -21,7 +21,7 @@ export class AuthService {
 	}
 
 	async login(client: Omit<Client, 'password'>) {
-		const payload = { documentId: client.documentId, clientId: client.id };
+		const payload = { documentId: client.documentId, id: client.id, phone: client.phone };
 		return {
 			accessToken: this.jwtService.sign(payload),
 		};
