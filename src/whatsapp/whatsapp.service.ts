@@ -44,10 +44,10 @@ export class WhatsappService {
 		this.messageService.createMessage(message, clientId, fromPhone, chatId);
 	}
 
-	private async sendMessage(fromPhone: string, to: string, message: string, clientId: string) {
-		const client = this.clients.get(fromPhone);
+	private async sendMessage(to: string, fromPhone: string, message: string, clientId: string) {
+		const client = this.clients.get(to);
 		if (!client) throw new UnauthorizedException('Número não está conectado');
-		const send = await client.sendText(`${to}@c.us`, message);
+		const send = await client.sendText(`${fromPhone}@c.us`, message);
 
 		if (send) {
 			this.seveMessage(fromPhone, message, clientId);
@@ -92,7 +92,7 @@ export class WhatsappService {
 		return { message: 'Aguardando Qr Code' };
 	}
 
-	async checkBalance(client: ClientStrategy, to: string, message: string) {
+	async checkBalance(client: ClientStrategy, from: string, message: string) {
 		const { balance, active } = await handlePrisma(async () => {
 			const clientBalance = await this.clientService.findBalanc(client.clientId);
 			if (clientBalance === null) return { balance: null, active: false };
@@ -103,7 +103,7 @@ export class WhatsappService {
 		}
 		this.clientService.payingBance(client.clientId, balance);
 
-		return this.sendMessage(client.phone, to, message, client.clientId);
+		return this.sendMessage(client.phone, from, message, client.clientId);
 	}
 
 	async getQrCode(phone: string): Promise<{ message: string; qr: string }> {

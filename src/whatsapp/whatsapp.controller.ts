@@ -17,8 +17,8 @@ export class WhatsappController {
 
 	@Post('send')
 	@UseGuards(JwtAuthGuard)
-	async send(@getLoggedIn() client: ClientStrategy, @Body() body: { to: string; message: string }) {
-		return this.whatsappService.checkBalance(client, body.to, body.message);
+	async send(@getLoggedIn() client: ClientStrategy, @Body() body: { from: string; message: string }) {
+		return this.whatsappService.checkBalance(client, body.from, body.message);
 	}
 
 	@Get('qr')
