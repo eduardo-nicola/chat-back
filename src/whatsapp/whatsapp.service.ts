@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import { Sender } from '@/@types/send';
 import { ClientStrategy } from '@/auth/dto/client-strategy';
 import { ChatsService } from '@/chats/chats.service';
 import { ClientsService } from '@/clients/clients.service';
@@ -29,34 +30,34 @@ export class WhatsappService {
 		return path.resolve(__dirname, 'sessions', phone);
 	}
 
-	private async seveMessage(fromPhone: string, message: string, clientId: string) {
+	private async seveMessage(fromPhone: string, message: string, clientId: string, wpId: string, senderIsMy: boolean) {
 		const ids: { exist: false | string; new: string } = { exist: false, new: '' };
-		const chat = await this.chatService.findChat(clientId);
+		const chat = await this.chatService.findChat(wpId);
 		ids.exist = chat?.id ?? false;
 
-		if (!chat) {
-			const chatCreated = await this.chatService.createNewChat(clientId, fromPhone);
+		if (chat === null) {
+			const chatCreated = await this.chatService.createNewChat(clientId, fromPhone, wpId);
 			ids.new = chatCreated.id;
 		}
 
 		const chatId = ids.exist ? ids.exist : ids.new;
 
-		this.messageService.createMessage(message, clientId, fromPhone, chatId);
+		this.messageService.createMessage(message, clientId, fromPhone, chatId, senderIsMy);
 	}
 
 	private async sendMessage(to: string, fromPhone: string, message: string, clientId: string) {
 		const client = this.clients.get(to);
 		if (!client) throw new UnauthorizedException('Número não está conectado');
-		const send = await client.sendText(`${fromPhone}@c.us`, message);
+		const send = (await client.sendText(`${fromPhone}@c.us`, message)) as Sender;
 
-		if (send) {
-			this.seveMessage(fromPhone, message, clientId);
+		if (send.to) {
+			this.seveMessage(fromPhone, message, clientId, send.to.remote._serialized, true);
 		}
 
 		return { message: 'Mensagem enviado com sucesso' };
 	}
 
-	async registerPhoneNumber(phone: string): Promise<{ message: string }> {
+	async registerPhoneNumber(phone: string, clientId: string): Promise<{ message: string }> {
 		const sessionFolder = this.getSessionFolder(phone);
 		const options: CreateConfig = {
 			browserArgs: ['--no-sandbox', '--disable-setuid-sandbox', '--remote-debugging-port=9222'],
@@ -80,8 +81,12 @@ export class WhatsappService {
 					this.logger.log(`Estado da sessão ${phone}: ${state}`);
 				});
 				client.onMessage((message: Message) => {
-					this.chatService.updateChatFromName(message.from, message.chat.name);
-					this.logger.log(`[${phone}] Mensagem de ${message.from}:`, message);
+					this.seveMessage(message.from.replace(/\@c.us/, ''), message.content, clientId, message.sender.id, false);
+					this.chatService.updateChatFromName(
+						message.sender.id,
+						message.sender.name,
+						message.sender.profilePicThumbObj.eurl,
+					);
 				});
 				this.clients.set(phone, client);
 			})

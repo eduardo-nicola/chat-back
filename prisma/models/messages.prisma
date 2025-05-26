@@ -7,6 +7,7 @@ model Message {
   fromPhone   String @map("from_phone")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime? @updatedAt @map("updated_at")
+  senderIsMy   Boolean   @map("sender_is_my")
 
   Client     Client   @relation(fields: [clientId], references: [id])
   Chats      Chats     @relation(fields: [chatId], references: [id])

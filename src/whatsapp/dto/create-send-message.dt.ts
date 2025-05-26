@@ -10,5 +10,5 @@ export class CreateSendMessageDto {
 
 	@IsString({ message: 'O campo toPhone deve ser uma string' })
 	@IsNotEmpty({ message: 'O campo toPhone não pode ser vazio' })
-	toPhone: string;
+	from: string;
 }

@@ -3,6 +3,8 @@ model Chats{
   clientId    String   @map("client_id")
   fromName    String?  @map("from_name")
   fromPhone   String   @map("from_phone")@unique
+  avatar      String?  @map("avatar")
+  wpId        String   @map("wp_id") @unique
 
   client     Client   @relation(fields: [clientId], references: [id])
   Messages Message[]
