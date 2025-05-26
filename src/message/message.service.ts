@@ -9,7 +9,14 @@ export class MessageService {
 	async createMessage(message: string, clientId: string, fromPhone: string, chatId: string, senderIsMy: boolean) {
 		handlePrisma(async () => {
 			await this.prismaService.message.create({
-				data: { message, status: 'SENT', clientId, fromPhone: fromPhone, chatId: chatId, senderIsMy: senderIsMy },
+				data: {
+					message: message,
+					status: 'SENT',
+					clientId,
+					fromPhone: fromPhone,
+					chatId: chatId,
+					senderIsMy: senderIsMy,
+				},
 			});
 		});
 	}
