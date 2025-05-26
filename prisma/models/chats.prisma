@@ -1,0 +1,12 @@
+model Chats{
+  id          String   @id @default(cuid())
+  clientId    String   @map("client_id")
+  fromName    String?  @map("from_name")
+  fromPhone   String   @map("from_phone")@unique
+
+  client     Client   @relation(fields: [clientId], references: [id])
+  Messages Message[]
+
+
+@@map("chats")
+}

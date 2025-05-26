@@ -60,4 +60,22 @@ export class ClientsService {
 
 		return { message: 'Balance atualizado com sucesso', balance: newBalance.balance };
 	}
+
+	async payingBance(clientId: string, balance: number) {
+		handlePrisma(async () => {
+			await this.prismaService.client.update({
+				where: { id: clientId },
+				data: { balance: balance - 0.25 },
+			});
+		});
+	}
+
+	async findBalanc(clientId: string) {
+		return handlePrisma(async () => {
+			return this.prismaService.client.findUnique({
+				where: { id: clientId },
+				select: { balance: true, active: true },
+			});
+		});
+	}
 }

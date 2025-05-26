@@ -1,5 +1,8 @@
 import * as path from 'node:path';
 import { ClientStrategy } from '@/auth/dto/client-strategy';
+import { ChatsService } from '@/chats/chats.service';
+import { ClientsService } from '@/clients/clients.service';
+import { MessageService } from '@/message/message.service';
 import { handlePrisma } from '@/shered/handle-prisma';
 import {
 	Injectable,
@@ -8,7 +11,6 @@ import {
 	UnauthorizedException,
 	UnprocessableEntityException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateConfig, Message, Whatsapp, create } from 'venom-bot';
 
 @Injectable()
@@ -17,10 +19,29 @@ export class WhatsappService {
 	private clients: Map<string, Whatsapp> = new Map();
 	private qrcodes: Map<string, string> = new Map();
 
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly messageService: MessageService,
+		private readonly clientService: ClientsService,
+		private readonly chatService: ChatsService,
+	) {}
 
 	private getSessionFolder(phone: string): string {
 		return path.resolve(__dirname, 'sessions', phone);
+	}
+
+	private async seveMessage(fromPhone: string, message: string, clientId: string) {
+		const ids: { exist: false | string; new: string } = { exist: false, new: '' };
+		const chat = await this.chatService.findChat(clientId);
+		ids.exist = chat?.id ?? false;
+
+		if (!chat) {
+			const chatCreated = await this.chatService.createNewChat(clientId, fromPhone);
+			ids.new = chatCreated.id;
+		}
+
+		const chatId = ids.exist ? ids.exist : ids.new;
+
+		this.messageService.createMessage(message, clientId, fromPhone, chatId);
 	}
 
 	private async sendMessage(fromPhone: string, to: string, message: string, clientId: string) {
@@ -29,15 +50,11 @@ export class WhatsappService {
 		const send = await client.sendText(`${to}@c.us`, message);
 
 		if (send) {
-			handlePrisma(async () => {
-				this.prisma.message.create({ data: { message, status: 'SENT', clientId, fromPhone } });
-			});
+			this.seveMessage(fromPhone, message, clientId);
 		}
 
 		return { message: 'Mensagem enviado com sucesso' };
 	}
-
-	private async receivingMessage() {}
 
 	async registerPhoneNumber(phone: string): Promise<{ message: string }> {
 		const sessionFolder = this.getSessionFolder(phone);
@@ -47,7 +64,7 @@ export class WhatsappService {
 			disableWelcome: true,
 			mkdirFolderToken: sessionFolder,
 			headless: 'old',
-			logQR: false,
+			logQR: true,
 		};
 		create(
 			phone,
@@ -63,6 +80,7 @@ export class WhatsappService {
 					this.logger.log(`Estado da sessão ${phone}: ${state}`);
 				});
 				client.onMessage((message: Message) => {
+					this.chatService.updateChatFromName(message.from, message.chat.name);
 					this.logger.log(`[${phone}] Mensagem de ${message.from}:`, message);
 				});
 				this.clients.set(phone, client);
@@ -76,23 +94,14 @@ export class WhatsappService {
 
 	async checkBalance(client: ClientStrategy, to: string, message: string) {
 		const { balance, active } = await handlePrisma(async () => {
-			const clientBalance = await this.prisma.client.findUnique({
-				where: { id: client.clientId },
-				select: { balance: true, active: true },
-			});
+			const clientBalance = await this.clientService.findBalanc(client.clientId);
 			if (clientBalance === null) return { balance: null, active: false };
 			return clientBalance;
 		});
 		if (balance === null || balance < 0.25 || !active) {
 			throw new UnprocessableEntityException('Saldo insuficiente para enviar mensagem');
 		}
-
-		handlePrisma(async () => {
-			await this.prisma.client.update({
-				where: { id: client.clientId },
-				data: { balance: balance - 0.25 },
-			});
-		});
+		this.clientService.payingBance(client.clientId, balance);
 
 		return this.sendMessage(client.phone, to, message, client.clientId);
 	}
