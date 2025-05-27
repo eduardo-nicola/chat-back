@@ -81,7 +81,7 @@ export class WhatsappService {
 					this.logger.log(`Estado da sessão ${phone}: ${state}`);
 				});
 				client.onMessage((message: Message) => {
-					this.seveMessage(message.from.replace(/\@c.us/, ''), message.content, clientId, message.sender.id, false);
+					this.seveMessage(message.chatId.replace(/\@c.us/, ''), message.content, clientId, message.sender.id, false);
 					this.chatService.updateChatFromName(
 						message.sender.id,
 						message.sender.name,
